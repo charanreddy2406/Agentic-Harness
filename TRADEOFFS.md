@@ -1,28 +1,17 @@
-# What this harness covers — and what it doesn't
+# Migration decisions
 
-## Holds up
-- **Model-agnostic**: one adapter interface; swapping models doesn't touch the
-  loop, registry, permissions, or approvals.
-- **Permissioned by construction**: every call is schema-validated and routed
-  through the five-level engine before it can run.
-- **Human in control**: irreversible actions pause for approval; dangerous ones
-  require type-to-confirm; denials feed back and the agent revises.
-- **Auditable**: every call and decision is recorded.
+| TypeScript source | Python replacement |
+|---|---|
+| types.ts / adapters/adapter.ts | contracts.py and models.py |
+| tools/registry.ts | registry.py |
+| tools/examples.ts | tools.py |
+| adapters/openaiAdapter.ts / localAdapter.ts | models.py (OpenAI-compatible adapter plus deterministic demo) |
+| loop/run.ts | agent.py |
+| permissions/engine.ts / policy.ts | permissions.py (policy and decision engine); agent.py enforces the decision |
+| approval/cliGate.ts | approval.py |
+| audit/log.ts | audit.py |
+| Missing entry point/tests | main.py and tests/test_harness.py |
 
-## Not built here (the prereqs and the next rungs)
-- **Memory** (session / project / long-term in Postgres + pgvector) — the agent
-  here is stateless across runs. That's its own project.
-- **Connectors** (real OAuth apps, databases, browser automation, MCP servers) —
-  the tools here are local stubs; wiring real integrations is the connector layer.
-- **Sandboxed execution** — shell/code/browser tasks must run in isolated
-  containers with timeouts and secret isolation. Not in this core.
-- **Eval harness** — tool-choice accuracy, hallucinated actions, permission
-  violations, cost/latency. Without evals you're vibes-testing the agent.
-- **Interfaces** — CLI here; the same runtime should power Slack, web, API,
-  webhooks, and a scheduler.
+Synchronous Python intentionally replaces async TypeScript: one task and sequential tool calls are sufficient for the learning objective. Async is a future throughput choice, not required for correctness. The original local adapter assumed a hypothetical format; the Python version instead supports OpenAI-compatible servers, not arbitrary local protocols. No agent framework is required.
 
-## The honest summary
-adapter → registry → loop → permission engine → human approval → audit. That's
-the governed CORE of an OpenClaw-style runtime: any model can plan and use tools,
-but it reads freely, drafts safely, and asks before anything irreversible. Memory,
-connectors, the sandbox, evals, and interfaces build on this core.
+Improvements: restricted-schema validation with type checks, duplicate registration checks, integrated unattended policy, distinct draft handler, exact human confirmation based on permission level, assistant tool-call history, bounded call count, model timing, per-run audit with call IDs and timestamps, and explicit error observations, and termination on uncertain tool outcomes. These are not a substitute for production controls. See README for limits.
