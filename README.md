@@ -27,17 +27,6 @@ python3 main.py --model YOUR_TOOL_CAPABLE_MODEL --task 'Show me the project file
 
 Use a model available to your account. This path uses the SDK's Chat Completions tool protocol, with a 30-second client timeout and no automatic SDK retries. A compatible local server can be configured with `OPENAI_BASE_URL` and its required key; it must support the same tool-calling protocol. Live provider calls were not performed. API usage may incur charges. Never commit a key. The examples remain simulated even with a real model.
 
-## Learning order
-
-1. `main.py`: assemble dependencies, select input and call run_agent.
-2. `contracts.py`, `tools.py`: shared data, tool schema, example functions.
-3. `registry.py`: dictionary, discovery, validation.
-4. `models.py`: canonical model interface, demo and provider translation.
-5. `agent.py`: bounded loop, tool dispatch, observation, timing.
-6. `permissions.py`, `approval.py`, `audit.py`: safety controls.
-7. `tests/test_harness.py`: verification and failure cases.
-
-Execution: user task -> model receives messages and schemas -> proposed call -> validation -> effective permission -> human approval (if needed) -> handler or draft handler -> audit + tool observation -> next model request -> final answer.
 
 ## Scope
 
